@@ -120,6 +120,7 @@ var GEO = {
         note("Ortung freigegeben. Die Aufzeichnung startet mit der Einheit.");
         MAP.setLive(p.coords.latitude, p.coords.longitude);
         LOC.start();
+        mapMode();
       },
       function (e) {
         note(e.code === 1
@@ -174,9 +175,12 @@ var GEO = {
 var MAP = {
   m: null, line: null, ok: false, pts: [],
   marker: null, follow: true, live: false, now: null,
-  init: function () {
+  init: function (retry) {
     if (this.m || this.ok === "failed") return;
-    if (typeof window.L === "undefined") { this.fail(); return; }
+    if (typeof window.L === "undefined") {
+      if (!retry) { setTimeout(function () { MAP.init(true); }, 600); return; }
+      this.fail(); return;
+    }
     try {
       this.m = L.map("map", { zoomControl: false, attributionControl: true });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -397,7 +401,7 @@ function record(sec, done) {
     id: "s" + Date.now(), at: S.startedAt || Date.now(),
     run: Math.round(run), dur: Math.round(sec), done: done,
     label: fmtMin(cfg.run) + " / " + fmtMin(cfg.walk) + " × " + cfg.reps,
-    dist: Math.round(GEO.dist), pts: GEO.pts.slice(), hr: "", zone: ""
+    dist: Math.round(GEO.dist), pts: GEO.pts.slice()
   });
   sessions = sessions.slice(0, 100);
   sessions.forEach(function (s, i) { if (i >= 12) s.pts = []; });
@@ -558,7 +562,6 @@ function currentSession() { return sessions[Math.min(pick, sessions.length - 1)]
 
 function renderStats() {
   var has = sessions.length > 0;
-  $("statsTitle").textContent = detail && has ? "Einheit" : "Analyse";
   $("ovWrap").hidden = detail && has;
   $("statsBody").hidden = !(detail && has);
   if (!detail || !has) { renderOverview(); return; }
@@ -576,23 +579,14 @@ function renderStats() {
   var gain = elevGain(s.pts);
   var es = elevSeries(s.pts);
   $("aGain").textContent = es.length ? gain + " m aufwärts" : "–";
-  var okE = drawGraph("gElev", es, false);
-  $("cElev").textContent = okE
-    ? "Höhenprofil über die Strecke. GPS-Höhen sind ungenau — Strava rechnet sie nach dem Upload gegen ein Geländemodell nach."
-    : "Keine Höhendaten aufgezeichnet.";
+  drawGraph("gElev", es, false);
 
   var ps = paceSeries(s.pts);
   var avg = s.dist > 100 ? s.dur / (s.dist / 1000) : 0;
   $("aPace").textContent  = avg ? pace(avg) : "–";
   $("aPace2").textContent = avg ? pace(avg) : "–";
   $("aTime").textContent  = mmss(s.dur);
-  var okP = drawGraph("gPace", ps, true);
-  $("cPace").textContent = okP
-    ? "Höher heißt schneller. Schnellste " + pace(Math.min.apply(null, ps)) + "."
-    : "Keine Streckendaten für einen Paceverlauf.";
-
-  $("aHr").value = s.hr || "";
-  $("aZone").value = s.zone || "";
+  drawGraph("gPace", ps, true);
 
   renderTrend();
 }
@@ -602,17 +596,10 @@ function renderTrend() {
                       .slice(0, 12).reverse();
   var vals = withD.map(function (s) { return s.dist / 1000; });
   var ok = drawGraph("gTrend", vals, false);
-  if (!ok) {
-    $("aTrend").textContent = "–";
-    $("cTrend").textContent = "Ab zwei Einheiten mit Strecke zeigt sich hier die Entwicklung.";
-    return;
-  }
-  var first = vals[0], last = vals[vals.length - 1];
-  var diff = last - first;
+  if (!ok) { $("aTrend").textContent = "–"; return; }
+  var diff = vals[vals.length - 1] - vals[0];
   $("aTrend").textContent = (diff >= 0 ? "+" : "−") +
     Math.abs(diff).toFixed(2).replace(".", ",") + " km";
-  $("cTrend").textContent = "Distanz über die letzten " + vals.length +
-    " Einheiten mit Strecke, von links nach rechts.";
 }
 
 function renderOverview() {
@@ -630,7 +617,9 @@ function renderOverview() {
     if (key !== lastDay) {
       var h = document.createElement("div");
       h.className = "dayhead";
-      h.textContent = key;
+      h.innerHTML = "<span></span><i></i><span></span>";
+      h.children[0].textContent = dayName(d);
+      h.children[2].textContent = dateName(d);
       L.appendChild(h);
       lastDay = key;
     }
@@ -655,6 +644,7 @@ function mapMode() {
   var live = MAP.live;
   $("mapLive").hidden = !live;
   $("mapDate").style.display = live || !sessions.length ? "none" : "";
+  $("bGeo").hidden = cfg.geo;
 }
 function renderMapDate() {
   var has = sessions.length > 0;
@@ -752,16 +742,6 @@ $("bCenter").addEventListener("click", function () { MAP.recenter(); });
 $("bGeo").addEventListener("click", function () { GEO.prime(); });
 $("bGpx").addEventListener("click", function () { exportGpx(currentSession()); });
 
-["aHr|hr", "aZone|zone"].forEach(function (pair) {
-  var p = pair.split("|");
-  $(p[0]).addEventListener("input", function () {
-    var s = currentSession();
-    if (!s) return;
-    s[p[1]] = $(p[0]).value.trim();
-    saveLog();
-  });
-});
-
 bindNum("fRun",  "run",      null, true);
 bindNum("fWalk", "walk",     null, true);
 bindNum("fReps", "reps",     1,    false);
@@ -795,6 +775,7 @@ bindSwitch("swGeo",   "geo",   function () {
     $(p[0]).setAttribute("aria-pressed", String(cfg[p[1]]));
   });
   if (cfg.geo) note("Ortung bereit. Startet mit der Einheit.");
+  $("bGeo").hidden = cfg.geo;
 
   prep(); draw(); renderStats(); renderMapDate();
 

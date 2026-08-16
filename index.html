@@ -64,7 +64,7 @@
   <!-- ============ ANALYSE ============ -->
   <section class="pane" id="p-stats">
     <div class="head">
-      <h1 id="statsTitle">Analyse</h1>
+      <h1>Analyse</h1>
       <button class="gear" data-gear aria-label="Einstellungen öffnen" aria-haspopup="dialog">
         <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor"
              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -76,7 +76,6 @@
 
     <!-- Übersicht -->
     <div id="ovWrap">
-      <p class="lede">Alle aufgezeichneten Einheiten, nach Tag geordnet.</p>
       <div id="ovList"></div>
     </div>
 
@@ -103,7 +102,6 @@
           <path class="base" fill="none" stroke="currentColor" stroke-width="1"
                 stroke-dasharray="3 4" opacity=".3"></path>
         </svg>
-        <p class="cap" id="cElev"></p>
       </div>
 
       <div class="block">
@@ -115,22 +113,16 @@
           <path class="base" fill="none" stroke="currentColor" stroke-width="1"
                 stroke-dasharray="3 4" opacity=".3"></path>
         </svg>
-        <p class="cap" id="cPace"></p>
       </div>
 
       <div class="cols">
         <div>
           <h2>Zeit</h2><div class="big" id="aTime">–</div>
-          <h2>Ø Pace</h2><div class="big" id="aPace2">–</div>
         </div>
         <div>
-          <h2>Puls</h2>
-          <div class="big"><input id="aHr" type="text" inputmode="numeric" placeholder="–" aria-label="Puls"><em>bpm</em></div>
-          <h2>Zone</h2>
-          <div class="big"><input id="aZone" type="text" inputmode="numeric" placeholder="–" aria-label="Zone"></div>
+          <h2>Ø Pace</h2><div class="big" id="aPace2">–</div>
         </div>
       </div>
-      <p class="cap">Puls und Zone trägst du selbst ein — Apple Health ist für Web-Apps nicht zugänglich.</p>
 
       <div class="block trend">
         <h2>Trend</h2>
@@ -141,7 +133,6 @@
           <path class="base" fill="none" stroke="currentColor" stroke-width="1"
                 stroke-dasharray="3 4" opacity=".3"></path>
         </svg>
-        <p class="cap" id="cTrend"></p>
       </div>
 
       <button class="pill light wide" id="bGpx">GPX für Strava sichern</button>
@@ -213,18 +204,15 @@
       <button class="sw" id="swSound" aria-pressed="true" aria-label="Signaltöne"></button>
     </div>
     <div class="srow">
-      <div><div class="srow-t">Display anlassen</div>
-        <p>Nötig, damit die Ortung weiterläuft. Kostet Akku.</p></div>
+      <div><div class="srow-t">Display anlassen</div></div>
       <button class="sw" id="swWake" aria-pressed="true" aria-label="Display anlassen"></button>
     </div>
     <div class="srow">
-      <div><div class="srow-t">Strecke aufzeichnen</div>
-        <p>Zeichnet während der Einheit die Route auf. Erfordert Ortungsfreigabe.</p></div>
+      <div><div class="srow-t">Strecke aufzeichnen</div></div>
       <button class="sw" id="swGeo" aria-pressed="false" aria-label="Strecke aufzeichnen"></button>
     </div>
     <div class="srow">
-      <div><div class="srow-t">Vibration</div>
-        <p>Zusätzlicher Impuls beim Wechsel. Auf iPhones ohne Wirkung.</p></div>
+      <div><div class="srow-t">Vibration</div></div>
       <button class="sw" id="swBuzz" aria-pressed="true" aria-label="Vibration"></button>
     </div>
 
@@ -238,7 +226,6 @@
         <span>Minuten auslaufen</span>
       </label>
     </div>
-    <p class="cap">0 lässt den Abschnitt weg.</p>
 
     <button class="pill outline wide" id="bClear">Verlauf löschen</button>
   </div>
