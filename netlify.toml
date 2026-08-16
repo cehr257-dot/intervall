@@ -1,0 +1,29 @@
+# Netlify-Konfiguration.
+# Kein Build-Schritt: die Dateien werden so ausgeliefert, wie sie im Repo liegen.
+
+[build]
+  publish = "."
+  command = ""
+
+# sw.js und index.html dürfen nie im Browser-Cache hängen bleiben,
+# sonst bekommt das Gerät Änderungen verzögert.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Icons ändern sich selten
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

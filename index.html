@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="description" content="Intervall-Timer, Analyse und Streckenaufzeichnung für Lauf-Geh-Training.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Intervall">
+<title>Intervall</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ INTERVALLE ============ -->
+  <section class="pane on" id="p-run">
+    <div class="head">
+      <h1>Intervalle</h1>
+      <button class="gear" data-gear aria-label="Einstellungen öffnen" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="timer" role="status" aria-live="polite">
+      <div class="eyebrow" id="phase">Bereit</div>
+      <div class="clock" id="big">00:00</div>
+      <div class="round" id="sub">Noch nicht gestartet</div>
+    </div>
+
+    <div class="track" id="trackBar" aria-hidden="true"></div>
+    <p class="summary" id="total">—</p>
+
+    <div class="rows" id="inputs">
+      <label class="row">
+        <input id="fRun" type="text" inputmode="decimal" value="2" aria-label="Minuten laufen">
+        <span>Minuten laufen</span>
+      </label>
+      <label class="row">
+        <input id="fWalk" type="text" inputmode="decimal" value="2" aria-label="Minuten gehen">
+        <span>Minuten gehen</span>
+      </label>
+      <label class="row">
+        <input id="fReps" type="text" inputmode="numeric" value="6" aria-label="Runden">
+        <span>Runden</span>
+      </label>
+    </div>
+
+    <div class="pills">
+      <button class="pill light" id="bMain">Starten</button>
+      <button class="pill solid" id="bStop" disabled>Stopp</button>
+    </div>
+  </section>
+
+  <!-- ============ ANALYSE ============ -->
+  <section class="pane" id="p-stats">
+    <div class="head">
+      <h1 id="statsTitle">Analyse</h1>
+      <button class="gear" data-gear aria-label="Einstellungen öffnen" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Übersicht -->
+    <div id="ovWrap">
+      <p class="lede">Alle aufgezeichneten Einheiten, nach Tag geordnet.</p>
+      <div id="ovList"></div>
+    </div>
+
+    <!-- Einzelne Einheit -->
+    <div id="statsBody" hidden>
+      <div class="datebar">
+        <button class="nav" id="bBack" aria-label="Zur Übersicht">‹‹</button>
+        <div class="date"><span id="dDay">—</span><i></i><span id="dDate">—</span></div>
+        <button class="nav" id="bPrev" aria-label="Frühere Einheit">‹</button>
+        <button class="nav" id="bNext" aria-label="Spätere Einheit">›</button>
+      </div>
+
+      <div class="block">
+        <h2>Distanz</h2>
+        <div class="big" id="aDist">0,00 km</div>
+      </div>
+
+      <div class="block">
+        <h2>Höhe</h2>
+        <div class="big" id="aGain">–</div>
+        <svg class="graph" id="gElev" viewBox="0 0 320 78" preserveAspectRatio="none" aria-hidden="true">
+          <path class="ln" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linejoin="round" stroke-linecap="round"></path>
+          <path class="base" fill="none" stroke="currentColor" stroke-width="1"
+                stroke-dasharray="3 4" opacity=".3"></path>
+        </svg>
+        <p class="cap" id="cElev"></p>
+      </div>
+
+      <div class="block">
+        <h2>Pace</h2>
+        <div class="big" id="aPace">–</div>
+        <svg class="graph" id="gPace" viewBox="0 0 320 78" preserveAspectRatio="none" aria-hidden="true">
+          <path class="ln" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linejoin="round" stroke-linecap="round"></path>
+          <path class="base" fill="none" stroke="currentColor" stroke-width="1"
+                stroke-dasharray="3 4" opacity=".3"></path>
+        </svg>
+        <p class="cap" id="cPace"></p>
+      </div>
+
+      <div class="cols">
+        <div>
+          <h2>Zeit</h2><div class="big" id="aTime">–</div>
+          <h2>Ø Pace</h2><div class="big" id="aPace2">–</div>
+        </div>
+        <div>
+          <h2>Puls</h2>
+          <div class="big"><input id="aHr" type="text" inputmode="numeric" placeholder="–" aria-label="Puls"><em>bpm</em></div>
+          <h2>Zone</h2>
+          <div class="big"><input id="aZone" type="text" inputmode="numeric" placeholder="–" aria-label="Zone"></div>
+        </div>
+      </div>
+      <p class="cap">Puls und Zone trägst du selbst ein — Apple Health ist für Web-Apps nicht zugänglich.</p>
+
+      <div class="block trend">
+        <h2>Trend</h2>
+        <div class="big" id="aTrend">–</div>
+        <svg class="graph" id="gTrend" viewBox="0 0 320 78" preserveAspectRatio="none" aria-hidden="true">
+          <path class="ln" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linejoin="round" stroke-linecap="round"></path>
+          <path class="base" fill="none" stroke="currentColor" stroke-width="1"
+                stroke-dasharray="3 4" opacity=".3"></path>
+        </svg>
+        <p class="cap" id="cTrend"></p>
+      </div>
+
+      <button class="pill light wide" id="bGpx">GPX für Strava sichern</button>
+    </div>
+  </section>
+
+  <!-- ============ KARTE ============ -->
+  <section class="pane" id="p-map">
+    <div class="head">
+      <h1>Karte</h1>
+      <button class="gear" data-gear aria-label="Einstellungen öffnen" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mapbox">
+      <div id="map"></div>
+      <svg id="mapFallback" viewBox="0 0 300 340" preserveAspectRatio="xMidYMid slice" hidden aria-hidden="true">
+        <rect width="300" height="340" fill="#1B3BF5"></rect>
+        <path id="fbTrack" fill="none" stroke="#fff" stroke-width="2.6"
+              stroke-linejoin="round" stroke-linecap="round"></path>
+        <circle id="fbNow" r="6" fill="#fff" stroke="#1B3BF5" stroke-width="3" opacity="0"></circle>
+      </svg>
+      <div class="map-tex" aria-hidden="true"></div>
+      <button class="recenter" id="bCenter" hidden>Zentrieren</button>
+      <div class="map-empty" id="mapEmpty">
+        <span>Keine Strecke</span>
+        <p>Die Aufzeichnung startet zusammen mit der Einheit.</p>
+      </div>
+    </div>
+
+    <div class="livebar" id="mapLive" hidden>
+      <span class="pulse" aria-hidden="true"></span>
+      <span>Live — Aufzeichnung läuft</span>
+    </div>
+
+    <div class="datebar" id="mapDate">
+      <div class="date"><span id="mDay">—</span><i></i><span id="mDate">—</span></div>
+      <button class="nav" id="mPrev" aria-label="Frühere Einheit">‹</button>
+      <button class="nav" id="mNext" aria-label="Spätere Einheit">›</button>
+    </div>
+
+    <p class="cap" id="gpsNote">Ortung nicht aktiv.</p>
+    <button class="pill light wide" id="bGeo">Ortung erlauben</button>
+  </section>
+
+  <!-- ============ Tab-Insel ============ -->
+  <nav class="island" role="tablist" aria-label="Bereiche">
+    <button class="isl" data-t="run" role="tab" aria-selected="true">Intervalle</button>
+    <button class="isl" data-t="stats" role="tab" aria-selected="false">Analyse</button>
+    <button class="isl" data-t="map" role="tab" aria-selected="false">Karte</button>
+  </nav>
+</div>
+
+<div class="sheet-bg" id="sheetBg" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Einstellungen" hidden>
+  <div class="sheet-h">
+    <h2 class="sheet-title">Einstellungen</h2>
+    <button class="lnk" id="bClose">Fertig</button>
+  </div>
+  <div class="sheet-b">
+    <div class="srow">
+      <div><div class="srow-t">Signaltöne</div>
+        <p>Doppelton zum Laufen, einzelner Ton zum Gehen, drei Ticks als Countdown.</p></div>
+      <button class="sw" id="swSound" aria-pressed="true" aria-label="Signaltöne"></button>
+    </div>
+    <div class="srow">
+      <div><div class="srow-t">Display anlassen</div>
+        <p>Nötig, damit die Ortung weiterläuft. Kostet Akku.</p></div>
+      <button class="sw" id="swWake" aria-pressed="true" aria-label="Display anlassen"></button>
+    </div>
+    <div class="srow">
+      <div><div class="srow-t">Strecke aufzeichnen</div>
+        <p>Zeichnet während der Einheit die Route auf. Erfordert Ortungsfreigabe.</p></div>
+      <button class="sw" id="swGeo" aria-pressed="false" aria-label="Strecke aufzeichnen"></button>
+    </div>
+    <div class="srow">
+      <div><div class="srow-t">Vibration</div>
+        <p>Zusätzlicher Impuls beim Wechsel. Auf iPhones ohne Wirkung.</p></div>
+      <button class="sw" id="swBuzz" aria-pressed="true" aria-label="Vibration"></button>
+    </div>
+
+    <div class="rows">
+      <label class="row">
+        <input id="fWu" type="text" inputmode="decimal" value="0" aria-label="Minuten einlaufen">
+        <span>Minuten einlaufen</span>
+      </label>
+      <label class="row">
+        <input id="fCd" type="text" inputmode="decimal" value="0" aria-label="Minuten auslaufen">
+        <span>Minuten auslaufen</span>
+      </label>
+    </div>
+    <p class="cap">0 lässt den Abschnitt weg.</p>
+
+    <button class="pill outline wide" id="bClear">Verlauf löschen</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
