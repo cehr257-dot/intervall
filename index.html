@@ -43,11 +43,11 @@
     <div class="rows" id="inputs">
       <label class="row">
         <input id="fRun" type="text" inputmode="decimal" value="2" aria-label="Minuten laufen">
-        <span>Minuten laufen</span>
+        <span>Minutenlaufen</span>
       </label>
       <label class="row">
         <input id="fWalk" type="text" inputmode="decimal" value="2" aria-label="Minuten gehen">
-        <span>Minuten gehen</span>
+        <span>Minutengehen</span>
       </label>
       <label class="row">
         <input id="fReps" type="text" inputmode="numeric" value="6" aria-label="Runden">
@@ -97,10 +97,8 @@
         <h2>Höhe</h2>
         <div class="big" id="aGain">–</div>
         <svg class="graph" id="gElev" viewBox="0 0 320 78" preserveAspectRatio="none" aria-hidden="true">
-          <path class="ln" fill="none" stroke="currentColor" stroke-width="1.6"
+          <path class="ln" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linejoin="round" stroke-linecap="round"></path>
-          <path class="base" fill="none" stroke="currentColor" stroke-width="1"
-                stroke-dasharray="3 4" opacity=".3"></path>
         </svg>
       </div>
 
@@ -108,10 +106,8 @@
         <h2>Pace</h2>
         <div class="big" id="aPace">–</div>
         <svg class="graph" id="gPace" viewBox="0 0 320 78" preserveAspectRatio="none" aria-hidden="true">
-          <path class="ln" fill="none" stroke="currentColor" stroke-width="1.6"
+          <path class="ln" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linejoin="round" stroke-linecap="round"></path>
-          <path class="base" fill="none" stroke="currentColor" stroke-width="1"
-                stroke-dasharray="3 4" opacity=".3"></path>
         </svg>
       </div>
 
@@ -128,10 +124,8 @@
         <h2>Trend</h2>
         <div class="big" id="aTrend">–</div>
         <svg class="graph" id="gTrend" viewBox="0 0 320 78" preserveAspectRatio="none" aria-hidden="true">
-          <path class="ln" fill="none" stroke="currentColor" stroke-width="1.6"
+          <path class="ln" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linejoin="round" stroke-linecap="round"></path>
-          <path class="base" fill="none" stroke="currentColor" stroke-width="1"
-                stroke-dasharray="3 4" opacity=".3"></path>
         </svg>
       </div>
 
@@ -155,12 +149,11 @@
     <div class="mapbox">
       <div id="map"></div>
       <svg id="mapFallback" viewBox="0 0 300 340" preserveAspectRatio="xMidYMid slice" hidden aria-hidden="true">
-        <rect width="300" height="340" fill="#1B3BF5"></rect>
-        <path id="fbTrack" fill="none" stroke="#fff" stroke-width="2.6"
+        <rect width="300" height="340" fill="#151A2E"></rect>
+        <path id="fbTrack" fill="none" stroke="#1B3BF5" stroke-width="3.2"
               stroke-linejoin="round" stroke-linecap="round"></path>
-        <circle id="fbNow" r="6" fill="#fff" stroke="#1B3BF5" stroke-width="3" opacity="0"></circle>
+        <circle id="fbNow" r="6" fill="#1B3BF5" stroke="#fff" stroke-width="3" opacity="0"></circle>
       </svg>
-      <div class="map-tex" aria-hidden="true"></div>
       <button class="recenter" id="bCenter" hidden>Zentrieren</button>
       <div class="map-empty" id="mapEmpty">
         <span>Keine Strecke</span>

@@ -35,7 +35,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-o
 
 /* ---------- Kopfzeile ---------- */
 .head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}
-h1{font-size:34px;font-weight:700;letter-spacing:-.035em;line-height:1.05}
+h1{font-size:34px;font-weight:700;letter-spacing:-.035em;line-height:1.05;color:var(--blue)}
 .gear{padding:8px;margin:-8px;color:var(--ink)}
 .gear:active{color:var(--blue)}
 
@@ -128,19 +128,18 @@ h2{font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:3px}
 
 /* ---------- Karte ---------- */
 .mapbox{position:relative;width:100%;aspect-ratio:1/1.16;border-radius:22px;
-        overflow:hidden;background:var(--blue)}
-#map{position:absolute;inset:0;background:var(--blue)}
+        overflow:hidden;background:#151A2E}
+#map{position:absolute;inset:0;background:#151A2E}
 #mapFallback{position:absolute;inset:0;width:100%;height:100%}
-.leaflet-tile-pane{filter:grayscale(1) contrast(1.3) invert(1) sepia(1)
-                          saturate(7.5) hue-rotate(198deg) brightness(.8)}
-.leaflet-container{background:var(--blue)}
-.leaflet-control-attribution{font-family:var(--sans);font-size:8px;background:rgba(255,255,255,.7)}
-.map-tex{position:absolute;inset:0;pointer-events:none;z-index:500;
-         background-image:radial-gradient(rgba(255,255,255,.28) .7px,transparent .8px);
-         background-size:5px 5px}
+/* Dunkle, beschriftungsfreie Kacheln (CARTO Dark Matter) — keine Filter mehr nötig,
+   der Ton ist von Haus aus dunkel und ruhig statt über CSS erzwungen zu werden. */
+.leaflet-container{background:#151A2E}
+.leaflet-control-attribution{font-family:var(--sans);font-size:8px;
+   background:rgba(21,26,46,.55)!important;color:rgba(255,255,255,.55)!important}
+.leaflet-control-attribution a{color:rgba(255,255,255,.75)!important}
 .map-empty{position:absolute;inset:0;z-index:600;display:flex;flex-direction:column;
            align-items:center;justify-content:center;gap:9px;text-align:center;padding:0 34px;
-           color:#fff;background:var(--blue)}
+           color:#fff;background:#151A2E}
 .map-empty span{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase}
 .map-empty p{font-size:13px;color:rgba(255,255,255,.74);line-height:1.5;max-width:24ch}
 #mapDate{margin-top:24px;margin-bottom:8px}
@@ -161,9 +160,9 @@ h2{font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:3px}
 @keyframes beat{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.78)}}
 
 /* Standortpunkt auf der Karte */
-.now{width:16px;height:16px;border-radius:50%;background:#fff;
-     border:3px solid var(--blue);box-sizing:border-box;
-     box-shadow:0 0 0 6px rgba(255,255,255,.28)}
+.now{width:14px;height:14px;border-radius:50%;background:var(--blue);
+     border:3px solid #fff;box-sizing:border-box;
+     box-shadow:0 0 0 7px rgba(27,59,245,.28)}
 
 /* ---------- Tab-Insel ---------- */
 .island{

@@ -183,11 +183,15 @@ var MAP = {
     }
     try {
       this.m = L.map("map", { zoomControl: false, attributionControl: true });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19, attribution: "© OpenStreetMap"
+      /* CARTO Dark Matter, ohne Beschriftungen — ruhig und dunkel von Haus aus,
+         kein Kachel-Filter und keine Straßennamen-Unruhe mehr nötig. */
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png", {
+        maxZoom: 20, subdomains: "abcd",
+        attribution: "© OpenStreetMap, © CARTO"
       }).addTo(this.m);
       this.m.setView([52.52, 13.405], 13);
-      this.line = L.polyline([], { color: "#ffffff", weight: 3.2, opacity: 1 }).addTo(this.m);
+      this.line = L.polyline([], { color: "#1B3BF5", weight: 4, opacity: 1,
+                                    lineCap: "round", lineJoin: "round" }).addTo(this.m);
       /* Wischt der Nutzer selbst, hört das Mitziehen auf */
       this.m.on("dragstart zoomstart", function () {
         if (MAP.live) { MAP.follow = false; $("bCenter").hidden = false; }
@@ -445,12 +449,11 @@ function paceSeries(pts) {
   }
   return out;
 }
-/* Zeichnet eine Linie; ohne Daten bleibt nur die gestrichelte Grundlinie */
+/* Zeichnet eine schlichte Linie, ohne Gitter oder Grundlinie. */
 function drawGraph(id, vals, invert) {
   var svg = $(id);
-  var ln = svg.querySelector(".ln"), base = svg.querySelector(".base");
+  var ln = svg.querySelector(".ln");
   var W = 320, H = 78, pad = 9;
-  base.setAttribute("d", "M0 " + (H - pad) + " L" + W + " " + (H - pad));
   if (!vals || vals.length < 2) { ln.setAttribute("d", ""); return false; }
   var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
   var span = (hi - lo) || 1;
