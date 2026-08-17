@@ -533,8 +533,9 @@ function buildTrack() {
     t.appendChild(i);
   });
 }
+var curTab = "run";
 function syncRunBg() {
-  var active = S.running || (S.offset > 0 && !S.finished);
+  var active = (S.running || (S.offset > 0 && !S.finished)) && curTab === "run";
   document.body.classList.toggle("run-bg", active);
 }
 function draw() {
@@ -723,7 +724,7 @@ function renderOverview() {
     var b = document.createElement("button");
     b.className = "ovitem";
     b.innerHTML = '<span class="k"></span><span class="m"><b></b><span></span></span><span class="go">›</span>';
-    b.querySelector(".k").textContent = s.dist ? km(s.dist).replace(" km", "") : "–";
+    b.querySelector(".k").textContent = s.dist ? km(s.dist) : "–";
     b.querySelector(".m b").textContent = s.label;
     b.querySelector(".m span").textContent =
       clock(d) + " Uhr · " + mmss(s.dur) + (s.done ? "" : " · abgebrochen");
@@ -780,16 +781,32 @@ function updateLiveMapMetrics() {
 /* ================= Eingaben ================= */
 function num(v) { var n = parseFloat(String(v).replace(",", ".")); return isFinite(n) && n >= 0 ? n : 0; }
 function saveCfg() { if (ready) store.set(K_CFG, JSON.stringify(cfg)); }
-function bindNum(id, key, min, toSec) {
-  var el = $(id);
+/* Sekunden nur zeigen, wenn sie ungleich Null sind — "2:00" wird zu "2",
+   nur "2:30" bekommt tatsächlich einen Doppelpunkt. */
+function setSecEl(el, totalSec) {
+  if (!el) return;
+  var s = Math.round(totalSec % 60);
+  if (s === 0) { el.textContent = ""; el.hidden = true; }
+  else { el.textContent = ":" + pad(s); el.hidden = false; }
+}
+function bindNum(id, key, min, toSec, secId) {
+  var el = $(id), secEl = secId ? $(secId) : null;
   el.addEventListener("input", function () {
     var v = num(el.value);
     if (min !== null) v = Math.max(min, Math.round(v));
     cfg[key] = toSec ? v * 60 : v;
+    setSecEl(secEl, cfg[key]);
     if (!S.running && S.offset === 0) { prep(); draw(); }
     saveCfg();
   });
-  el.addEventListener("blur", function () { el.value = toSec ? fmtMin(cfg[key]) : String(cfg[key]); });
+  el.addEventListener("blur", function () {
+    if (toSec) {
+      el.value = String(Math.floor(cfg[key] / 60));
+      setSecEl(secEl, cfg[key]);
+    } else {
+      el.value = String(cfg[key]);
+    }
+  });
 }
 function bindSwitch(id, key, after) {
   var b = $(id);
@@ -802,8 +819,10 @@ function bindSwitch(id, key, after) {
 
 /* ================= Reiter, Sheet, Meldungen ================= */
 function goTab(t) {
+  curTab = t;
   document.querySelectorAll(".pane").forEach(function (p) { p.classList.toggle("on", p.id === "p-" + t); });
   document.querySelectorAll(".isl").forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.t === t)); });
+  syncRunBg();
   window.scrollTo(0, 0);
   if (t === "map") {
     MAP.init();
@@ -854,13 +873,14 @@ $("mPrev").addEventListener("click", function () { if (pick < sessions.length - 
 $("mNext").addEventListener("click", function () { if (pick > 0) { pick--; renderMapDate(); showPicked(); renderStats(); } });
 $("bCenter").addEventListener("click", function () { MAP.recenter(); });
 $("bGeo").addEventListener("click", function () { GEO.prime(); });
-$("bGpx").addEventListener("click", function () { exportGpx(currentSession()); });
+/* "GPX für Strava sichern" ist vorerst deaktiviert — exportGpx()/gpx() bleiben
+   im Code für eine spätere, direktere Strava-Anbindung erhalten. */
 
-bindNum("fRun",  "run",      null, true);
-bindNum("fWalk", "walk",     null, true);
+bindNum("fRun",  "run",      null, true, "fRunSec");
+bindNum("fWalk", "walk",     null, true, "fWalkSec");
 bindNum("fReps", "reps",     1,    false);
-bindNum("fWu",   "warmup",   null, true);
-bindNum("fCd",   "cooldown", null, true);
+bindNum("fWu",   "warmup",   null, true, "fWuSec");
+bindNum("fCd",   "cooldown", null, true, "fCdSec");
 bindSwitch("swSound", "sound", function () { if (S.running) schedule(); });
 bindSwitch("swWake",  "wake",  function () { if (cfg.wake && S.running) wakeOn(); else wakeOff(); });
 bindSwitch("swBuzz",  "buzz");
@@ -879,11 +899,11 @@ bindSwitch("swGeo",   "geo",   function () {
   if (rawLog) { try { var d = JSON.parse(rawLog); if (Array.isArray(d)) sessions = d; } catch (e) {} }
   ready = true;
 
-  $("fRun").value  = fmtMin(cfg.run);
-  $("fWalk").value = fmtMin(cfg.walk);
+  $("fRun").value  = Math.floor(cfg.run / 60);  setSecEl($("fRunSec"), cfg.run);
+  $("fWalk").value = Math.floor(cfg.walk / 60); setSecEl($("fWalkSec"), cfg.walk);
   $("fReps").value = String(cfg.reps);
-  $("fWu").value   = fmtMin(cfg.warmup);
-  $("fCd").value   = fmtMin(cfg.cooldown);
+  $("fWu").value   = Math.floor(cfg.warmup / 60);   setSecEl($("fWuSec"), cfg.warmup);
+  $("fCd").value   = Math.floor(cfg.cooldown / 60); setSecEl($("fCdSec"), cfg.cooldown);
   ["swSound|sound", "swWake|wake", "swBuzz|buzz", "swGeo|geo"].forEach(function (pair) {
     var p = pair.split("|");
     $(p[0]).setAttribute("aria-pressed", String(cfg[p[1]]));

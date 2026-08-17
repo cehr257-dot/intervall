@@ -50,18 +50,24 @@
 
     <div class="rows" id="inputs">
       <label class="row">
-        <input id="fRun" type="text" inputmode="decimal" value="2" aria-label="Minuten laufen">
-        <em>:00</em>
-        <span>Laufen</span>
+        <span class="rowval">
+          <input id="fRun" type="text" inputmode="decimal" value="2" aria-label="Minuten laufen">
+          <em id="fRunSec">:00</em>
+        </span>
+        <span class="rowlbl">Laufen</span>
       </label>
       <label class="row">
-        <input id="fWalk" type="text" inputmode="decimal" value="2" aria-label="Minuten gehen">
-        <em>:00</em>
-        <span>Gehen</span>
+        <span class="rowval">
+          <input id="fWalk" type="text" inputmode="decimal" value="2" aria-label="Minuten gehen">
+          <em id="fWalkSec">:00</em>
+        </span>
+        <span class="rowlbl">Gehen</span>
       </label>
       <label class="row">
-        <input id="fReps" type="text" inputmode="numeric" value="6" aria-label="Runden">
-        <span>Runden</span>
+        <span class="rowval">
+          <input id="fReps" type="text" inputmode="numeric" value="6" aria-label="Runden">
+        </span>
+        <span class="rowlbl">Runden</span>
       </label>
     </div>
 
@@ -131,7 +137,6 @@
         <div id="splitList"></div>
       </div>
 
-      <button class="pill light wide" id="bGpx">GPX für Strava sichern</button>
     </div>
   </section>
 
@@ -225,12 +230,18 @@
 
     <div class="rows">
       <label class="row">
-        <input id="fWu" type="text" inputmode="decimal" value="0" aria-label="Minuten einlaufen">
-        <span>Minuten einlaufen</span>
+        <span class="rowval">
+          <input id="fWu" type="text" inputmode="decimal" value="0" aria-label="Minuten einlaufen">
+          <em id="fWuSec">:00</em>
+        </span>
+        <span class="rowlbl">Einlaufen</span>
       </label>
       <label class="row">
-        <input id="fCd" type="text" inputmode="decimal" value="0" aria-label="Minuten auslaufen">
-        <span>Minuten auslaufen</span>
+        <span class="rowval">
+          <input id="fCd" type="text" inputmode="decimal" value="0" aria-label="Minuten auslaufen">
+          <em id="fCdSec">:00</em>
+        </span>
+        <span class="rowlbl">Auslaufen</span>
       </label>
     </div>
 

@@ -44,11 +44,11 @@ body.run-bg #p-run .gear{color:rgba(255,255,255,.75)}
 body.run-bg #p-run .idlesub{display:none}
 body.run-bg #p-run .nextwrap .tlabel{color:#AABAF4}
 body.run-bg #p-run .track i{background:#B9C8F466}
-body.run-bg #p-run .track i.current{background:transparent;box-shadow:inset 0 0 0 1.5px #fff}
-body.run-bg #p-run .track i.done{background:#fff}
+body.run-bg #p-run .track i.current{background:transparent!important;box-shadow:inset 0 0 0 1.5px #fff}
+body.run-bg #p-run .track i.done{background:#fff!important}
 body.run-bg #p-run .track i b{display:none}
 body.run-bg #p-run .rows,.run-bg #p-run .summary{display:none}
-body.run-bg #p-run .pills{margin-top:40px}
+body.run-bg #p-run .pills{margin-top:64px}
 body.run-bg #p-run .pill.solid{width:auto;flex:1;
                                 background:#FFFFFF40;color:#fff;border-color:transparent}
 body.run-bg #p-run .pill.solid:active{background:#FFFFFF59}
@@ -93,21 +93,21 @@ h1{font-size:32px;font-weight:600;letter-spacing:.01em;line-height:1.1;
 
 /* ---------- Eingabezeilen, kompakte MM:SS-Darstellung ---------- */
 .rows{margin-top:26px;padding-top:22px;border-top:1px solid var(--hair)}
-.row{display:flex;align-items:baseline;gap:2px;padding:9px 0;cursor:text}
-.row input{width:1.4ch;flex:none;background:none;border:none;
+.row{display:flex;align-items:baseline;gap:14px;padding:9px 0;cursor:text}
+/* Fester Wertbereich, damit alle drei Beschriftungen exakt auf einer Höhe beginnen */
+.rowval{width:84px;flex:none;display:flex;align-items:baseline;justify-content:flex-start}
+.row input{width:2ch;flex:none;background:none;border:none;
            font-size:28px;font-weight:800;letter-spacing:-.03em;
-           font-variant-numeric:tabular-nums;padding:0;text-align:right}
+           font-variant-numeric:tabular-nums;padding:0;text-align:left}
 .row input:focus{outline:none;color:var(--blue)}
 .row em{font-style:normal;font-size:28px;font-weight:800;letter-spacing:-.03em;
-        color:var(--ink);font-variant-numeric:tabular-nums;margin-right:12px}
-/* Runden-Zeile hat kein ":00" — braucht denselben Abstand von Hand */
-#fReps{margin-right:12px}
-.row span{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+        color:var(--ink);font-variant-numeric:tabular-nums}
+.rowlbl{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
           color:var(--ink-2)}
 .rows.locked{opacity:.36;pointer-events:none}
 
 /* ---------- Pillen ---------- */
-.pills{display:flex;align-items:center;gap:12px;margin-top:32px}
+.pills{display:flex;align-items:center;gap:12px;margin-top:48px}
 .pill.wide{width:100%}
 .stopcircle{display:flex;align-items:center;justify-content:center}
 .pill{width:100%;padding:16px 18px;border-radius:24px;font-size:14px;font-weight:600;
@@ -115,8 +115,7 @@ h1{font-size:32px;font-weight:600;letter-spacing:.01em;line-height:1.1;
       transition:background .14s,color .14s,border-color .14s}
 .pill.light{background:var(--paper);color:var(--blue);border:1.5px solid var(--blue)}
 .pill.light:active{background:var(--surface)}
-.pill.solid{background:linear-gradient(135deg,var(--blue),var(--blue-light));
-            color:#fff;border:1.5px solid var(--blue)}
+.pill.solid{background:var(--blue);color:#fff;border:1.5px solid var(--blue)}
 .pill.solid:active{background:var(--blue-dark);border-color:var(--blue-dark)}
 .pill[disabled]{opacity:.3;cursor:default}
 
@@ -212,10 +211,10 @@ h2{font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:3px}
 .dayhead i{width:1px;height:14px;background:var(--hair);display:block;flex:none}
 .ovitem{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
         padding:15px 0;border-bottom:1px solid var(--hair)}
-.ovitem .k{font-size:22px;font-weight:500;letter-spacing:-.04em;
-           font-variant-numeric:tabular-nums;min-width:5.4ch}
+.ovitem .k{font-size:22px;font-weight:700;letter-spacing:-.04em;color:var(--blue);
+           font-variant-numeric:tabular-nums;min-width:7ch}
 .ovitem .m{flex:1}
-.ovitem .m b{display:block;font-size:14px;font-weight:600}
+.ovitem .m b{display:block;font-size:14px;font-weight:600;color:var(--blue)}
 .ovitem .m span{display:block;font-size:12px;color:var(--ink-2);margin-top:2px;
                 font-variant-numeric:tabular-nums}
 .ovitem .go{color:var(--ink-3);font-size:19px;flex:none}
@@ -282,7 +281,7 @@ h2{font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:3px}
 /* ---------- Tab-Insel ---------- */
 .island{
   position:fixed;left:50%;transform:translateX(-50%);
-  bottom:calc(12px + var(--safe-b));z-index:20;
+  bottom:calc(12px + var(--safe-b));z-index:900;
   display:flex;gap:2px;padding:4px;border-radius:999px;
   background:rgba(255,255,255,.92);
   backdrop-filter:blur(18px) saturate(180%);
@@ -304,10 +303,10 @@ body.run-bg .isl{color:#D8E1FF}
 body.run-bg .isl[aria-selected="true"]{background:#fff;color:var(--blue)}
 
 /* ---------- Einstellungen ---------- */
-.sheet-bg{position:fixed;inset:0;background:rgba(16,37,90,.3);z-index:30;
+.sheet-bg{position:fixed;inset:0;background:rgba(16,37,90,.3);z-index:910;
           opacity:0;transition:opacity .22s;backdrop-filter:blur(2px)}
 .sheet-bg.on{opacity:1}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--paper);
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:911;background:var(--paper);
        border-radius:26px 26px 0 0;max-width:440px;margin:0 auto;
        max-height:90vh;overflow-y:auto;
        transform:translateY(101%);transition:transform .28s cubic-bezier(.32,.72,0,1);
@@ -335,7 +334,7 @@ body.run-bg .isl[aria-selected="true"]{background:#fff;color:var(--blue)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);
        bottom:calc(var(--barh) + 26px);
        background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;
-       font-size:13px;z-index:40;opacity:0;pointer-events:none;transition:opacity .2s;
+       font-size:13px;z-index:920;opacity:0;pointer-events:none;transition:opacity .2s;
        max-width:86vw;text-align:center;box-shadow:0 3px 12px rgba(16,37,90,.14)}
 .toast.on{opacity:1}
 
