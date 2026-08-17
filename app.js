@@ -183,14 +183,14 @@ var MAP = {
     }
     try {
       this.m = L.map("map", { zoomControl: false, attributionControl: true });
-      /* CARTO Dark Matter, ohne Beschriftungen — ruhig und dunkel von Haus aus,
-         kein Kachel-Filter und keine Straßennamen-Unruhe mehr nötig. */
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png", {
+      /* CARTO Positron, ohne Beschriftungen — hell und reduziert, die Route
+         soll dominieren, nicht die Karte. */
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", {
         maxZoom: 20, subdomains: "abcd",
         attribution: "© OpenStreetMap, © CARTO"
       }).addTo(this.m);
       this.m.setView([52.52, 13.405], 13);
-      this.line = L.polyline([], { color: "#1B3BF5", weight: 4, opacity: 1,
+      this.line = L.polyline([], { color: "#087FAF", weight: 4, opacity: 1,
                                     lineCap: "round", lineJoin: "round" }).addTo(this.m);
       /* Wischt der Nutzer selbst, hört das Mitziehen auf */
       this.m.on("dragstart zoomstart", function () {
@@ -510,6 +510,7 @@ function mmss(s) {
   return h ? h + ":" + pad(m) + ":" + pad(s % 60) : pad(m) + ":" + pad(s % 60);
 }
 function pace(sec) { return Math.floor(sec / 60) + ":" + pad(Math.round(sec % 60)) + "/km"; }
+function paceNum(sec) { return Math.floor(sec / 60) + ":" + pad(Math.round(sec % 60)); }
 function fmtMin(sec) { return String(Math.round(sec / 60 * 100) / 100); }
 function km(m) { return (m / 1000).toFixed(2).replace(".", ",") + " km"; }
 
@@ -536,11 +537,6 @@ function syncRunBg() {
   var active = S.running || (S.offset > 0 && !S.finished);
   document.body.classList.toggle("run-bg", active);
 }
-function nextSegLabel(i) {
-  var n = S.segs[i + 1];
-  if (!n) return "";
-  return mmss(n.dur) + " " + n.label;
-}
 function draw() {
   var e = elapsed(), i = segAt(e), seg = S.segs[i];
   var active = S.running || (S.offset > 0 && !S.finished);
@@ -556,17 +552,22 @@ function draw() {
   if (seg) {
     $("big").textContent = mmss(S.finished ? 0 : S.bounds[i] + seg.dur - e);
     $("phaseWord").textContent = S.finished ? "Fertig" : seg.label;
+    $("phaseWord").classList.toggle("walk", !S.finished && seg.type === "walk");
     $("stateLabel").textContent = S.finished ? "Fertig"
       : (active ? (seg.idx ? "Runde " + seg.idx + " / " + cfg.reps : seg.label) : "Training");
   } else {
     $("big").textContent = "00:00"; $("phaseWord").textContent = "Bereit";
+    $("phaseWord").classList.remove("walk");
     $("stateLabel").textContent = "Training";
   }
   $("idleSub").hidden = active || S.finished;
 
-  var nv = active && !S.finished ? nextSegLabel(i) : "";
-  $("nextWrap").hidden = !nv;
-  if (nv) $("nextVal").textContent = nv;
+  var nextSeg = active && !S.finished ? S.segs[i + 1] : null;
+  $("nextWrap").hidden = !nextSeg;
+  if (nextSeg) {
+    $("nextVal").textContent = mmss(nextSeg.dur) + " " + nextSeg.label;
+    $("nextVal").classList.toggle("walk", nextSeg.type === "walk");
+  }
 
   var runTot = S.segs.reduce(function (a, s) { return a + (s.type === "run" ? s.dur : 0); }, 0);
   $("total").textContent = S.total
@@ -600,7 +601,7 @@ function renderStats() {
   var d = new Date(s.at);
   $("dDateTxt").textContent = dayName(d) + ", " + dateName(d);
 
-  $("aDist").textContent = s.dist ? km(s.dist).toUpperCase() : "0,00 KM";
+  $("aDist").textContent = s.dist ? (s.dist / 1000).toFixed(2).replace(".", ",") : "0,00";
   $("aTime").textContent = mmss(s.dur);
 
   var gain = elevGain(s.pts);
@@ -613,14 +614,38 @@ function renderStats() {
   $("aBest").textContent = ps.length ? pace(Math.min.apply(null, ps)) : "–";
 
   var okP = drawGraph("gPace", ps, true);
-  $("gPace").style.display = okP ? "" : "none";
+  $("paceChartWrap").hidden = !okP;
+  $("paceXAxis").hidden = !okP;
   $("paceEmpty").hidden = okP;
-  if (!okP) {
+  if (okP) {
+    renderPaceAxes(ps, s.dur);
+  } else {
     $("paceEmpty").textContent = (s.pts && s.pts.length)
       ? "Zu kurze Aufzeichnung" : "Keine Pace verfügbar";
   }
 
   renderSplits(s);
+}
+
+/* Wenige Achsenwerte statt eines dichten Gitters: drei Y-Werte über die
+   Spannweite der Pace, Start- und Endzeit auf der X-Achse. */
+function renderPaceAxes(ps, dur) {
+  var lo = Math.min.apply(null, ps), hi = Math.max.apply(null, ps);
+  var mid = (lo + hi) / 2;
+  var y = $("paceYAxis");
+  y.innerHTML = "";
+  [hi, mid, lo].forEach(function (v) {
+    var sp = document.createElement("span");
+    sp.textContent = pace(v).replace(" /km", "").replace("/km", "");
+    y.appendChild(sp);
+  });
+  var x = $("paceXAxis");
+  x.innerHTML = "";
+  [0, dur / 2, dur].forEach(function (v) {
+    var sp = document.createElement("span");
+    sp.textContent = mmss(v);
+    x.appendChild(sp);
+  });
 }
 
 /* Rekonstruiert die Runden aus dem gespeicherten Konfigurationsstand und
@@ -647,15 +672,15 @@ function renderSplits(s) {
     row.className = "split-row";
     row.innerHTML =
       '<span class="split-n"></span>' +
+      '<div class="split-times"><b></b><small></small></div>' +
       '<div class="split-bar"><i class="run"></i><i class="walk"></i></div>' +
-      '<span class="split-times"></span>' +
       '<span class="split-pace"></span>';
     row.querySelector(".split-n").textContent = seg.idx;
     var runI = row.querySelector(".run"), walkI = row.querySelector(".walk");
     runI.style.flex = seg.dur + " 0 0";
     walkI.style.flex = (walkAfter ? walkAfter.dur : 0.001) + " 0 0";
-    row.querySelector(".split-times").textContent =
-      mmss(seg.dur) + (walkAfter ? " / " + mmss(walkAfter.dur) : "");
+    row.querySelector(".split-times b").textContent = mmss(seg.dur) + " Laufen";
+    row.querySelector(".split-times small").textContent = walkAfter ? mmss(walkAfter.dur) + " Gehen" : "";
     row.querySelector(".split-pace").textContent = splitPace ? pace(splitPace) : "–";
     list.appendChild(row);
   });
@@ -734,9 +759,9 @@ function showPicked() {
   MAP.show(s ? s.pts : []);
   if (s && s.dist > 100) {
     var avg = s.dur / (s.dist / 1000);
-    $("mDist").textContent = km(s.dist);
+    $("mDist").textContent = (s.dist / 1000).toFixed(2).replace(".", ",");
     $("mTime").textContent = mmss(s.dur);
-    $("mPace").textContent = pace(avg);
+    $("mPace").textContent = paceNum(avg);
     $("mapMetrics").hidden = false;
   } else {
     $("mapMetrics").hidden = true;
@@ -746,9 +771,9 @@ function showPicked() {
 function updateLiveMapMetrics() {
   if (GEO.dist < 100) { $("mapMetrics").hidden = true; return; }
   var e = elapsed();
-  $("mDist").textContent = km(GEO.dist);
+  $("mDist").textContent = (GEO.dist / 1000).toFixed(2).replace(".", ",");
   $("mTime").textContent = mmss(e);
-  $("mPace").textContent = e > 20 ? pace(e / (GEO.dist / 1000)) : "–";
+  $("mPace").textContent = e > 20 ? paceNum(e / (GEO.dist / 1000)) : "–";
   $("mapMetrics").hidden = false;
 }
 
@@ -779,7 +804,6 @@ function bindSwitch(id, key, after) {
 function goTab(t) {
   document.querySelectorAll(".pane").forEach(function (p) { p.classList.toggle("on", p.id === "p-" + t); });
   document.querySelectorAll(".isl").forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.t === t)); });
-  document.body.classList.toggle("stats-bg", t === "stats");
   window.scrollTo(0, 0);
   if (t === "map") {
     MAP.init();

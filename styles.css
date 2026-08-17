@@ -3,17 +3,20 @@
 
 :root{
   --paper:#FFFFFF;
-  --ink:#10255A;         /* Primary Text / Navy */
-  --ink-2:#65759A;       /* Secondary Text */
-  --ink-3:#94A1BE;       /* Muted Text */
-  --blue:#1746F5;        /* Primary Blue */
-  --blue-dark:#1239D6;   /* Primary Blue Dark */
-  --offwhite:#F8FAFD;
-  --hair:#DFE5F0;        /* Border */
-  --subtle:#EBEFF6;      /* Subtle Border */
-  --surface:#F1F4FA;     /* Light Surface */
-  --grey:#E8EDF8;        /* Light Blue-Grey — zukünftige Segmente, Gehen */
-  --sans:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;
+  --ink:#0B1130;          /* gemessen aus den Konfigurationszeilen (#070F2E, #050614) */
+  --ink-2:#5D5E61;        /* gemessen: neutrales Grau, nicht blaustichig */
+  --ink-3:#B6B7B8;        /* aus ink-2 abgeleitet, 55% Weiß */
+  --blue:#0840E0;         /* dominanter Blauton aus dem Mockup, per Pixel-Analyse ermittelt */
+  --blue-light:#5F87F1;   /* zweiter Ton im CTA-Verlauf, ebenfalls gemessen */
+  --blue-dark:#062FB0;    /* für gedrückte Zustände, aus --blue abgeleitet */
+  --offwhite:#F7F8F8;
+  --hair:#E7E8EC;
+  --subtle:#EEEFF2;
+  --surface:#F7F8F8;
+  --grey:#B9C8FA;         /* gemessen: helle Fortschritts-/Zukunftsfläche */
+  --blue-text-light:#7090ED;  /* lesbares Hellblau für "Gehen"-Text auf Weiß */
+  --blue-text-active-light:#C8D4FF; /* Hellblau für "Gehen"-Text auf blauem Grund */
+  --sans:"Inter","Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;
   --safe-b:env(safe-area-inset-bottom,0px);
   --safe-t:env(safe-area-inset-top,0px);
   --barh:calc(60px + var(--safe-b));
@@ -28,69 +31,27 @@ body{
   letter-spacing:-.012em;-webkit-font-smoothing:antialiased;overscroll-behavior:none;
   transition:background .25s ease;
 }
-/* Reiter Analyse: eigener blauer Hintergrund, weiße Schrift — nur auf dieser Seite */
-body.stats-bg{background:var(--blue)}
-body.stats-bg #p-stats h1{color:#fff}
-body.stats-bg #p-stats .gear{color:#fff}
-body.stats-bg #p-stats .gear:active{color:rgba(255,255,255,.7)}
-body.stats-bg #p-stats .nav{border-color:rgba(255,255,255,.34);color:rgba(255,255,255,.85)}
-body.stats-bg #p-stats .nav:active{background:rgba(255,255,255,.14);color:#fff}
-body.stats-bg #p-stats .nav[disabled]{opacity:.28}
-body.stats-bg #p-stats h2{color:rgba(255,255,255,.72)}
-body.stats-bg #p-stats .big{color:#fff}
-body.stats-bg #p-stats .big em{color:rgba(255,255,255,.55)}
-body.stats-bg #p-stats .cap{color:rgba(255,255,255,.68)}
-body.stats-bg #p-stats .dayhead{color:rgba(255,255,255,.85)}
-body.stats-bg #p-stats .dayhead i{background:rgba(255,255,255,.3)}
-body.stats-bg #p-stats .ovitem{border-color:rgba(255,255,255,.2)}
-body.stats-bg #p-stats .ovitem .m span{color:rgba(255,255,255,.68)}
-body.stats-bg #p-stats .ovitem .go{color:rgba(255,255,255,.55)}
-body.stats-bg #p-stats .ovitem:active{opacity:.7}
-body.stats-bg #p-stats .empty p{color:rgba(255,255,255,.72)}
-body.stats-bg #p-stats .empty b{color:#fff}
-body.stats-bg #p-stats .graph{color:#fff}
-body.stats-bg #p-stats .pill.light{background:#fff;color:var(--blue);border-color:#fff}
-body.stats-bg #p-stats .pill.light:active{background:rgba(255,255,255,.85)}
-body.stats-bg #p-stats .backlink{color:rgba(255,255,255,.78)}
-body.stats-bg #p-stats .datenav span{color:#fff}
-body.stats-bg #p-stats .big-value{color:#fff}
-body.stats-bg #p-stats .metrics-row span{color:rgba(255,255,255,.68)}
-body.stats-bg #p-stats .metrics-row b{color:#fff}
-body.stats-bg #p-stats .chart-head > span{color:rgba(255,255,255,.68)}
-body.stats-bg #p-stats .chart-side{color:rgba(255,255,255,.75)}
-body.stats-bg #p-stats .chart-side b{color:#fff}
-body.stats-bg #p-stats .empty-chart{background:rgba(255,255,255,.1);color:rgba(255,255,255,.65)}
-body.stats-bg #p-stats .splits h2{color:rgba(255,255,255,.68)}
-body.stats-bg #p-stats .split-row{border-color:rgba(255,255,255,.2)}
-body.stats-bg #p-stats .split-n{color:rgba(255,255,255,.55)}
-body.stats-bg #p-stats .split-times{color:rgba(255,255,255,.75)}
-body.stats-bg #p-stats .split-pace{color:#fff}
-body.stats-bg #p-stats .split-bar{background:rgba(255,255,255,.16)}
-body.stats-bg #p-stats .split-bar i.walk{background:rgba(255,255,255,.34)}
-body.stats-bg #p-stats .split-bar i.run{background:#fff}
 
 /* Reiter Intervalle im Aktiv-Zustand: vollflächig blau, weiße Schrift,
    instrumentell statt vorbereitend. Kein Schwarz, keine Zusatzfarbe. */
 body.run-bg{background:var(--blue)}
 body.run-bg #p-run h1,
 body.run-bg #p-run .tlabel,
-body.run-bg #p-run .clock,
-body.run-bg #p-run .phaseword,
-body.run-bg #p-run .nextval{color:#fff}
+body.run-bg #p-run .clock{color:#fff}
+body.run-bg #p-run .phaseword{color:#fff}
+body.run-bg #p-run .phaseword.walk{color:var(--blue-text-active-light)}
 body.run-bg #p-run .gear{color:rgba(255,255,255,.75)}
 body.run-bg #p-run .idlesub{display:none}
 body.run-bg #p-run .nextwrap .tlabel{color:#AABAF4}
-body.run-bg #p-run .ndiv{background:#FFFFFF33}
 body.run-bg #p-run .track i{background:#B9C8F466}
 body.run-bg #p-run .track i.current{background:transparent;box-shadow:inset 0 0 0 1.5px #fff}
 body.run-bg #p-run .track i.done{background:#fff}
 body.run-bg #p-run .track i b{display:none}
 body.run-bg #p-run .rows,.run-bg #p-run .summary{display:none}
 body.run-bg #p-run .pills{margin-top:40px}
-body.run-bg #p-run .pill.solid{background:#FFFFFF40;color:#fff;border-color:transparent}
+body.run-bg #p-run .pill.solid{width:auto;flex:1;
+                                background:#FFFFFF40;color:#fff;border-color:transparent}
 body.run-bg #p-run .pill.solid:active{background:#FFFFFF59}
-body.run-bg #p-run .pill.outline{color:#C8D4FF}
-body.run-bg #p-run .pill.outline:active{color:#fff}
 button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:inherit}
 input{font-family:var(--sans);color:inherit}
 button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:4px}
@@ -103,59 +64,74 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-o
 
 /* ---------- Kopfzeile ---------- */
 .head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}
-h1{font-size:34px;font-weight:700;letter-spacing:-.035em;line-height:1.05;color:var(--blue)}
+/* Karte: Titel und Datum eng zusammen, wie im Mockup, danach mehr Luft vor der Karte */
+#p-map .head{margin-bottom:2px}
+h1{font-size:32px;font-weight:600;letter-spacing:.01em;line-height:1.1;
+   color:var(--blue);text-transform:uppercase}
 .gear{padding:8px;margin:-8px;color:var(--ink)}
 .gear:active{color:var(--blue)}
 
 /* ---------- Timer ---------- */
 .timer{margin-bottom:20px}
 .tlabel{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--blue)}
-.clock{font-size:64px;font-weight:300;letter-spacing:-.05em;line-height:1.04;margin-top:8px;
-       font-variant-numeric:tabular-nums;color:var(--ink)}
+.clock{font-size:68px;font-weight:800;letter-spacing:-.04em;line-height:1;margin-top:8px;
+       font-variant-numeric:tabular-nums;color:var(--blue)}
 .phaseword{font-size:15px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;
-           color:var(--ink);margin-top:6px}
+           color:var(--blue);margin-top:6px}
+.phaseword.walk{color:var(--blue-text-light)}
 .idlesub{font-size:13px;color:var(--ink-2);margin-top:4px;font-variant-numeric:tabular-nums}
-.nextwrap{margin-top:16px}
-.ndiv{display:block;width:28px;height:1px;background:rgba(255,255,255,.4);margin-bottom:14px}
+.nextwrap{margin-top:26px}
 .nextval{font-size:15px;font-weight:600;color:#fff;margin-top:3px}
+.nextval.walk{color:var(--blue-text-active-light)}
 
-.track{display:flex;gap:2px;height:8px;margin:0 0 16px}
-.track i{display:block;height:100%;border-radius:2px;position:relative;overflow:hidden;
-         background:var(--grey)}
+.track{display:flex;gap:6px;height:10px;margin:22px 0 20px}
+.track i{display:block;height:100%;border-radius:4px;position:relative;overflow:hidden;
+         background:#D5DEFC}
 .track i b{position:absolute;inset:0 100% 0 0;background:var(--blue);transition:right .2s linear}
 
 .summary{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 
 /* ---------- Eingabezeilen, kompakte MM:SS-Darstellung ---------- */
-.rows{margin-top:30px}
+.rows{margin-top:26px;padding-top:22px;border-top:1px solid var(--hair)}
 .row{display:flex;align-items:baseline;gap:2px;padding:9px 0;cursor:text}
 .row input{width:1.4ch;flex:none;background:none;border:none;
-           font-size:26px;font-weight:500;letter-spacing:-.03em;
+           font-size:28px;font-weight:800;letter-spacing:-.03em;
            font-variant-numeric:tabular-nums;padding:0;text-align:right}
 .row input:focus{outline:none;color:var(--blue)}
-.row em{font-style:normal;font-size:26px;font-weight:500;letter-spacing:-.03em;
+.row em{font-style:normal;font-size:28px;font-weight:800;letter-spacing:-.03em;
         color:var(--ink);font-variant-numeric:tabular-nums;margin-right:12px}
+/* Runden-Zeile hat kein ":00" — braucht denselben Abstand von Hand */
+#fReps{margin-right:12px}
 .row span{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
           color:var(--ink-2)}
 .rows.locked{opacity:.36;pointer-events:none}
 
 /* ---------- Pillen ---------- */
-.pills{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:32px}
-.pill{width:100%;padding:16px 18px;border-radius:14px;font-size:14px;font-weight:600;
+.pills{display:flex;align-items:center;gap:12px;margin-top:32px}
+.pill.wide{width:100%}
+.stopcircle{display:flex;align-items:center;justify-content:center}
+.pill{width:100%;padding:16px 18px;border-radius:24px;font-size:14px;font-weight:600;
       letter-spacing:.02em;text-transform:uppercase;
       transition:background .14s,color .14s,border-color .14s}
 .pill.light{background:var(--paper);color:var(--blue);border:1.5px solid var(--blue)}
 .pill.light:active{background:var(--surface)}
-.pill.solid{background:var(--blue);color:#fff;border:1.5px solid var(--blue)}
+.pill.solid{background:linear-gradient(135deg,var(--blue),var(--blue-light));
+            color:#fff;border:1.5px solid var(--blue)}
 .pill.solid:active{background:var(--blue-dark);border-color:var(--blue-dark)}
-.pill.outline{width:auto;padding:8px 4px;background:none;color:var(--ink-2);
-              border:none;text-transform:none;letter-spacing:0;font-size:14px}
-.pill.wide{width:100%}
 .pill[disabled]{opacity:.3;cursor:default}
 
+/* Kreisrunder Stopp-Button im Aktiv-Zustand: weißer Rahmen, weißes Quadrat innen */
+.stopcircle{width:56px;height:56px;border-radius:50%;flex:none;
+            border:1.5px solid #FFFFFF80;background:none}
+.stopcircle span{display:block;width:16px;height:16px;border-radius:3px;
+                 background:#fff;margin:0 auto}
+.stopcircle:active{background:#FFFFFF1A}
 /* ---------- Analyse ---------- */
 /* Vereinfachte Datumsnavigation: ‹ Datum › in einer Zeile, keine doppeldeutigen Symbole */
 .datenav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:22px}
+/* Karte: Datum linksbündig direkt unter dem Titel, wie im Mockup, mit kompakten Pfeilen */
+#p-map .datenav{justify-content:flex-start;gap:8px;margin-bottom:18px}
+#p-map .datenav span{min-width:auto;text-align:left}
 .datenav span{font-size:13px;font-weight:600;color:var(--blue);
               letter-spacing:.01em;min-width:15ch;text-align:center}
 .backlink{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;
@@ -177,24 +153,33 @@ h2{font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:3px}
 .big input::placeholder{color:var(--ink-3)}
 .big input:focus{outline:none;color:var(--blue)}
 
-.graph{width:100%;height:78px;margin-top:10px;color:var(--blue);display:block;overflow:visible}
+.chart-wrap{position:relative;margin-top:10px;padding-left:32px}
+.graph{width:100%;height:78px;color:var(--blue-dark);display:block;overflow:visible}
+.chart-y{position:absolute;top:0;left:0;width:28px;height:78px;display:flex;
+         flex-direction:column;justify-content:space-between;pointer-events:none}
+.chart-y span{font-size:9px;font-weight:500;color:var(--ink-3);
+              font-variant-numeric:tabular-nums;line-height:1}
+.chart-x{display:flex;justify-content:space-between;margin-top:6px;padding-left:32px}
+.chart-x span{font-size:9px;font-weight:500;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .cap{font-size:12px;color:var(--ink-3);line-height:1.5;margin-top:12px}
 
 /* Kompakte Zusammenfassung: großer Distanzwert, drei Kennzahlen nebeneinander */
 .summary-main{margin-bottom:18px}
-.big-value{font-size:44px;font-weight:500;letter-spacing:-.045em;color:var(--ink);
+.big-value{display:flex;align-items:baseline;gap:6px;font-size:50px;font-weight:800;
+           letter-spacing:-.03em;color:var(--blue);
            font-variant-numeric:tabular-nums;line-height:1}
+.big-value em{font-style:normal;font-size:20px;font-weight:600;letter-spacing:.02em}
 .metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:30px}
 .metrics-row div{text-align:left}
 .metrics-row span{font-size:10px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
-                   color:var(--ink-2)}
-.metrics-row b{display:block;margin-top:4px;font-size:19px;font-weight:500;letter-spacing:-.03em;
+                   color:var(--blue)}
+.metrics-row b{display:block;margin-top:4px;font-size:21px;font-weight:800;letter-spacing:-.03em;
                color:var(--ink);font-variant-numeric:tabular-nums}
 
 .chart-block{margin-bottom:32px}
 .chart-head{display:flex;align-items:baseline;justify-content:space-between}
-.chart-head > span{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-                    color:var(--ink-2)}
+.chart-head > span{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+                    color:var(--blue)}
 .chart-side{color:var(--ink-2);font-weight:400!important;letter-spacing:0!important;
             text-transform:none!important}
 .chart-side b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
@@ -203,14 +188,15 @@ h2{font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:3px}
              background:var(--surface);border-radius:10px}
 
 /* Splits */
-.splits h2{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-           color:var(--ink-2);margin-bottom:10px}
-.split-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--subtle)}
+.splits h2{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+           color:var(--blue);margin-bottom:10px}
+.split-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--hair)}
 .split-n{width:1.4em;flex:none;font-size:13px;font-weight:600;color:var(--ink-3);
          font-variant-numeric:tabular-nums}
-.split-times{flex:none;font-size:12.5px;color:var(--ink-2);width:9ch;
-             font-variant-numeric:tabular-nums}
-.split-bar{flex:1;display:flex;height:5px;border-radius:3px;overflow:hidden;background:var(--surface)}
+.split-times{flex:none;width:14ch;font-variant-numeric:tabular-nums;line-height:1.3}
+.split-times b{display:block;font-size:13px;font-weight:700;color:var(--ink)}
+.split-times small{display:block;font-size:11px;font-weight:400;color:var(--ink-3)}
+.split-bar{flex:1;display:flex;height:4px;border-radius:2px;overflow:hidden;background:var(--offwhite)}
 .split-bar i.run{background:var(--blue)}
 .split-bar i.walk{background:var(--grey)}
 .split-pace{flex:none;font-size:13px;font-weight:500;color:var(--ink);width:6.5ch;
@@ -256,7 +242,9 @@ h2{font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:3px}
                 color:var(--ink-3)}
 .map-empty p{font-size:13px;color:var(--ink-2);line-height:1.5;max-width:24ch}
 
-/* Zentrieren-Taste */
+/* Kopf und Datum der Karte: normale weiße Seite, keine Überlagerung —
+   entspricht dem Referenz-Mockup, nicht der vorherigen Annahme. */
+
 .recenter{position:absolute;right:14px;bottom:14px;z-index:620;
           width:44px;height:44px;border-radius:50%;
           display:flex;align-items:center;justify-content:center;
@@ -265,29 +253,31 @@ h2{font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:3px}
           box-shadow:0 3px 10px rgba(16,37,90,.08)}
 .recenter:active{background:#fff}
 
-/* Live-Hinweis */
-.livebar{display:flex;align-items:center;gap:9px;margin-top:16px;margin-bottom:4px;
-         font-size:13px;color:var(--blue);font-weight:600;
+/* Live-Hinweis: kleines Badge auf der Karte */
+.livebar{position:absolute;left:16px;top:16px;z-index:615;
+         display:flex;align-items:center;gap:7px;
+         padding:7px 12px;border-radius:999px;
+         background:rgba(255,255,255,.92);
+         font-size:11px;color:var(--blue);font-weight:600;
          text-transform:uppercase;letter-spacing:.08em}
-.pulse{width:8px;height:8px;border-radius:50%;background:var(--blue);flex:none;
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--blue);flex:none;
        animation:beat 1.6s ease-in-out infinite}
 @keyframes beat{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.78)}}
 
 /* Standortpunkt */
 .now{width:14px;height:14px;border-radius:50%;background:var(--blue);
      border:3px solid #fff;box-sizing:border-box;
-     box-shadow:0 0 0 6px rgba(23,70,245,.2)}
+     box-shadow:0 0 0 6px rgba(8,64,224,.2)}
 
-/* Metrik-Überlagerung unten auf der Karte */
-.map-metrics{position:absolute;left:0;right:0;bottom:0;z-index:610;
-             display:grid;grid-template-columns:repeat(3,1fr);
-             padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));
-             background:linear-gradient(0deg,rgba(255,255,255,.94),rgba(255,255,255,.7) 70%,transparent)}
-.map-metrics div{text-align:left}
-.map-metrics b{display:block;font-size:19px;font-weight:500;letter-spacing:-.03em;
-               color:var(--ink);font-variant-numeric:tabular-nums}
-.map-metrics span{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-                  color:var(--blue)}
+/* Metriken unter der Karte: Wert groß, Einheit klein an der Grundlinie,
+   Kategorie-Label darunter — Reihenfolge wie im Mockup (nicht wie in Analyse) */
+.map-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.map-metrics div{text-align:left;display:flex;flex-wrap:wrap;align-items:baseline;gap:5px}
+.map-metrics b{font-size:24px;font-weight:800;letter-spacing:-.03em;
+               color:var(--blue);font-variant-numeric:tabular-nums}
+.map-metrics em{font-style:normal;font-size:12px;font-weight:600;color:var(--blue)}
+.map-metrics span{width:100%;font-size:10px;font-weight:600;letter-spacing:.13em;
+                  text-transform:uppercase;color:var(--blue)}
 
 /* ---------- Tab-Insel ---------- */
 .island{
@@ -304,9 +294,9 @@ h2{font-size:13px;font-weight:500;color:var(--ink-2);margin-bottom:3px}
 }
 .isl{padding:9px 15px;border-radius:999px;font-size:13px;font-weight:600;
      color:var(--ink-2);white-space:nowrap;transition:background .18s,color .18s}
-.isl[aria-selected="true"]{background:var(--blue);color:#fff}
+.isl[aria-selected="true"]{background:var(--grey);color:var(--blue)}
 .isl:active{color:var(--blue)}
-.isl[aria-selected="true"]:active{color:#fff}
+.isl[aria-selected="true"]:active{color:var(--blue)}
 
 /* Insel im Aktiv-Zustand: dezent auf dem blauen Grund statt weißem Glas */
 body.run-bg .island{background:#FFFFFF0D;border-color:#FFFFFF40}
