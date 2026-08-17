@@ -32,9 +32,15 @@
     </div>
 
     <div class="timer" role="status" aria-live="polite">
-      <div class="eyebrow" id="phase">Bereit</div>
+      <div class="tlabel" id="stateLabel">Training</div>
       <div class="clock" id="big">00:00</div>
-      <div class="round" id="sub">Noch nicht gestartet</div>
+      <div class="phaseword" id="phaseWord">Bereit</div>
+      <div class="idlesub" id="idleSub">Noch nicht gestartet</div>
+      <div class="nextwrap" id="nextWrap" hidden>
+        <i class="ndiv" aria-hidden="true"></i>
+        <div class="tlabel">Nächster Abschnitt</div>
+        <div class="nextval" id="nextVal">—</div>
+      </div>
     </div>
 
     <div class="track" id="trackBar" aria-hidden="true"></div>
@@ -43,11 +49,13 @@
     <div class="rows" id="inputs">
       <label class="row">
         <input id="fRun" type="text" inputmode="decimal" value="2" aria-label="Minuten laufen">
-        <span>Minutenlaufen</span>
+        <em>:00</em>
+        <span>Laufen</span>
       </label>
       <label class="row">
         <input id="fWalk" type="text" inputmode="decimal" value="2" aria-label="Minuten gehen">
-        <span>Minutengehen</span>
+        <em>:00</em>
+        <span>Gehen</span>
       </label>
       <label class="row">
         <input id="fReps" type="text" inputmode="numeric" value="6" aria-label="Runden">
@@ -56,8 +64,8 @@
     </div>
 
     <div class="pills">
-      <button class="pill light" id="bMain">Starten</button>
-      <button class="pill solid" id="bStop" disabled>Stopp</button>
+      <button class="pill solid wide" id="bMain">Training starten</button>
+      <button class="pill outline" id="bStop" hidden>Beenden</button>
     </div>
   </section>
 
@@ -81,52 +89,38 @@
 
     <!-- Einzelne Einheit -->
     <div id="statsBody" hidden>
-      <div class="datebar">
-        <button class="nav" id="bBack" aria-label="Zur Übersicht">‹‹</button>
-        <div class="date"><span id="dDay">—</span><i></i><span id="dDate">—</span></div>
+      <button class="backlink" id="bBack">‹ Übersicht</button>
+
+      <div class="datenav">
         <button class="nav" id="bPrev" aria-label="Frühere Einheit">‹</button>
+        <span id="dDateTxt">—</span>
         <button class="nav" id="bNext" aria-label="Spätere Einheit">›</button>
       </div>
 
-      <div class="block">
-        <h2>Distanz</h2>
-        <div class="big" id="aDist">0,00 km</div>
+      <div class="summary-main">
+        <div class="big-value" id="aDist">0,00 KM</div>
+      </div>
+      <div class="metrics-row">
+        <div><span>Zeit</span><b id="aTime">–</b></div>
+        <div><span>Ø Pace</span><b id="aPace2">–</b></div>
+        <div><span>Höhenmeter</span><b id="aGain">–</b></div>
       </div>
 
-      <div class="block">
-        <h2>Höhe</h2>
-        <div class="big" id="aGain">–</div>
-        <svg class="graph" id="gElev" viewBox="0 0 320 78" preserveAspectRatio="none" aria-hidden="true">
-          <path class="ln" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linejoin="round" stroke-linecap="round"></path>
-        </svg>
-      </div>
-
-      <div class="block">
-        <h2>Pace</h2>
-        <div class="big" id="aPace">–</div>
+      <div class="chart-block">
+        <div class="chart-head">
+          <span>Pace</span>
+          <span class="chart-side">Schnellste <b id="aBest">–</b></span>
+        </div>
         <svg class="graph" id="gPace" viewBox="0 0 320 78" preserveAspectRatio="none" aria-hidden="true">
           <path class="ln" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linejoin="round" stroke-linecap="round"></path>
         </svg>
+        <p class="empty-chart" id="paceEmpty" hidden></p>
       </div>
 
-      <div class="cols">
-        <div>
-          <h2>Zeit</h2><div class="big" id="aTime">–</div>
-        </div>
-        <div>
-          <h2>Ø Pace</h2><div class="big" id="aPace2">–</div>
-        </div>
-      </div>
-
-      <div class="block trend">
-        <h2>Trend</h2>
-        <div class="big" id="aTrend">–</div>
-        <svg class="graph" id="gTrend" viewBox="0 0 320 78" preserveAspectRatio="none" aria-hidden="true">
-          <path class="ln" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linejoin="round" stroke-linecap="round"></path>
-        </svg>
+      <div class="splits" id="splitsWrap">
+        <h2>Splits</h2>
+        <div id="splitList"></div>
       </div>
 
       <button class="pill light wide" id="bGpx">GPX für Strava sichern</button>
@@ -137,42 +131,47 @@
   <section class="pane" id="p-map">
     <div class="head">
       <h1>Karte</h1>
-      <button class="gear" data-gear aria-label="Einstellungen öffnen" aria-haspopup="dialog">
-        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-      </button>
     </div>
 
-    <div class="mapbox">
+    <div class="mapbox big">
       <div id="map"></div>
       <svg id="mapFallback" viewBox="0 0 300 340" preserveAspectRatio="xMidYMid slice" hidden aria-hidden="true">
-        <rect width="300" height="340" fill="#151A2E"></rect>
-        <path id="fbTrack" fill="none" stroke="#1B3BF5" stroke-width="3.2"
+        <rect width="300" height="340" fill="#F5F7FA"></rect>
+        <path id="fbTrack" fill="none" stroke="#1746F5" stroke-width="3.2"
               stroke-linejoin="round" stroke-linecap="round"></path>
-        <circle id="fbNow" r="6" fill="#1B3BF5" stroke="#fff" stroke-width="3" opacity="0"></circle>
+        <circle id="fbNow" r="6" fill="#1746F5" stroke="#fff" stroke-width="3" opacity="0"></circle>
       </svg>
-      <button class="recenter" id="bCenter" hidden>Zentrieren</button>
+      <button class="recenter" id="bCenter" hidden aria-label="Auf Standort zentrieren">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="7"></circle>
+          <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"></circle>
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
+        </svg>
+      </button>
       <div class="map-empty" id="mapEmpty">
         <span>Keine Strecke</span>
         <p>Die Aufzeichnung startet zusammen mit der Einheit.</p>
+      </div>
+      <div class="map-metrics" id="mapMetrics" hidden>
+        <div><b id="mDist">–</b><span>Distanz</span></div>
+        <div><b id="mTime">–</b><span>Zeit</span></div>
+        <div><b id="mPace">–</b><span>Pace</span></div>
       </div>
     </div>
 
     <div class="livebar" id="mapLive" hidden>
       <span class="pulse" aria-hidden="true"></span>
-      <span>Live — Aufzeichnung läuft</span>
+      <span>Live</span>
     </div>
 
-    <div class="datebar" id="mapDate">
-      <div class="date"><span id="mDay">—</span><i></i><span id="mDate">—</span></div>
+    <div class="datenav" id="mapDate">
       <button class="nav" id="mPrev" aria-label="Frühere Einheit">‹</button>
+      <span id="mDateTxt">—</span>
       <button class="nav" id="mNext" aria-label="Spätere Einheit">›</button>
     </div>
 
-    <p class="cap" id="gpsNote">Ortung nicht aktiv.</p>
+    <p class="cap" id="gpsNote" hidden></p>
     <button class="pill light wide" id="bGeo">Ortung erlauben</button>
   </section>
 

@@ -117,7 +117,7 @@ var GEO = {
         cfg.geo = true;
         $("swGeo").setAttribute("aria-pressed", "true");
         saveCfg();
-        note("Ortung freigegeben. Die Aufzeichnung startet mit der Einheit.");
+        note("");
         MAP.setLive(p.coords.latitude, p.coords.longitude);
         LOC.start();
         mapMode();
@@ -142,7 +142,6 @@ var GEO = {
       function (e) { if (e.code === 1) { GEO.stop(); note("Ortung abgelehnt."); } },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 1000 }
     );
-    note("Strecke wird aufgezeichnet.");
   },
   stop: function () {
     if (this.id !== null) { navigator.geolocation.clearWatch(this.id); this.id = null; }
@@ -168,6 +167,7 @@ var GEO = {
                    c.altitude === null || c.altitude === undefined ? null : Math.round(c.altitude)]);
     MAP.add(c.latitude, c.longitude);
     MAP.setLive(c.latitude, c.longitude);
+    if (typeof updateLiveMapMetrics === "function") updateLiveMapMetrics();
   }
 };
 
@@ -305,14 +305,15 @@ var LOC = {
 };
 
 /* ================= Einheit ================= */
-function buildSegs() {
+function buildSegs(c) {
+  c = c || cfg;
   var s = [];
-  if (cfg.warmup > 0) s.push({ type: "walk", dur: cfg.warmup, label: "Einlaufen" });
-  for (var i = 0; i < cfg.reps; i++) {
-    if (cfg.run > 0)  s.push({ type: "run",  dur: cfg.run,  label: "Laufen", idx: i + 1 });
-    if (cfg.walk > 0) s.push({ type: "walk", dur: cfg.walk, label: "Gehen",  idx: i + 1 });
+  if (c.warmup > 0) s.push({ type: "walk", dur: c.warmup, label: "Einlaufen" });
+  for (var i = 0; i < c.reps; i++) {
+    if (c.run > 0)  s.push({ type: "run",  dur: c.run,  label: "Laufen", idx: i + 1 });
+    if (c.walk > 0) s.push({ type: "walk", dur: c.walk, label: "Gehen",  idx: i + 1 });
   }
-  if (cfg.cooldown > 0) s.push({ type: "walk", dur: cfg.cooldown, label: "Auslaufen" });
+  if (c.cooldown > 0) s.push({ type: "walk", dur: c.cooldown, label: "Auslaufen" });
   return s;
 }
 function prep() {
@@ -405,7 +406,10 @@ function record(sec, done) {
     id: "s" + Date.now(), at: S.startedAt || Date.now(),
     run: Math.round(run), dur: Math.round(sec), done: done,
     label: fmtMin(cfg.run) + " / " + fmtMin(cfg.walk) + " × " + cfg.reps,
-    dist: Math.round(GEO.dist), pts: GEO.pts.slice()
+    dist: Math.round(GEO.dist), pts: GEO.pts.slice(),
+    /* Schnappschuss der Intervalle zum Aufnahmezeitpunkt — damit Splits auch
+       dann noch stimmen, wenn später andere Werte in den Reglern stehen. */
+    lap: { run: cfg.run, walk: cfg.walk, reps: cfg.reps, warmup: cfg.warmup, cooldown: cfg.cooldown }
   });
   sessions = sessions.slice(0, 100);
   sessions.forEach(function (s, i) { if (i >= 12) s.pts = []; });
@@ -528,28 +532,48 @@ function buildTrack() {
     t.appendChild(i);
   });
 }
+function syncRunBg() {
+  var active = S.running || (S.offset > 0 && !S.finished);
+  document.body.classList.toggle("run-bg", active);
+}
+function nextSegLabel(i) {
+  var n = S.segs[i + 1];
+  if (!n) return "";
+  return mmss(n.dur) + " " + n.label;
+}
 function draw() {
   var e = elapsed(), i = segAt(e), seg = S.segs[i];
+  var active = S.running || (S.offset > 0 && !S.finished);
+  syncRunBg();
+
   Array.prototype.forEach.call($("trackBar").children, function (el, k) {
     var f = S.segs[k] ? Math.max(0, Math.min(1, (e - S.bounds[k]) / S.segs[k].dur)) : 0;
     el.firstChild.style.right = ((1 - f) * 100).toFixed(1) + "%";
+    el.classList.toggle("done", f >= 1);
+    el.classList.toggle("current", k === i && f < 1);
   });
+
   if (seg) {
     $("big").textContent = mmss(S.finished ? 0 : S.bounds[i] + seg.dur - e);
-    $("phase").textContent = S.finished ? "Fertig" : seg.label;
-    $("sub").textContent = S.running || S.offset > 0
-      ? (seg.idx ? "Runde " + seg.idx + " von " + cfg.reps : seg.label + " · " + mmss(seg.dur))
-      : "Noch nicht gestartet";
+    $("phaseWord").textContent = S.finished ? "Fertig" : seg.label;
+    $("stateLabel").textContent = S.finished ? "Fertig"
+      : (active ? (seg.idx ? "Runde " + seg.idx + " / " + cfg.reps : seg.label) : "Training");
   } else {
-    $("big").textContent = "00:00"; $("phase").textContent = "Bereit";
-    $("sub").textContent = "Noch nicht gestartet";
+    $("big").textContent = "00:00"; $("phaseWord").textContent = "Bereit";
+    $("stateLabel").textContent = "Training";
   }
+  $("idleSub").hidden = active || S.finished;
+
+  var nv = active && !S.finished ? nextSegLabel(i) : "";
+  $("nextWrap").hidden = !nv;
+  if (nv) $("nextVal").textContent = nv;
+
   var runTot = S.segs.reduce(function (a, s) { return a + (s.type === "run" ? s.dur : 0); }, 0);
   $("total").textContent = S.total
     ? "Gesamt " + mmss(S.total) + " · davon " + mmss(runTot) + " laufen" : "—";
-  $("bMain").textContent = S.finished ? "Neu starten" : (S.running ? "Pause" : (S.offset > 0 ? "Weiter" : "Starten"));
-  $("bStop").disabled = !(S.running || S.offset > 0);
-  $("inputs").classList.toggle("locked", S.running || S.offset > 0);
+  $("bMain").textContent = S.finished ? "Neu starten" : (S.running ? "Pause" : (active ? "Weiter" : "Training starten"));
+  $("bStop").hidden = !active;
+  $("inputs").classList.toggle("locked", active);
 }
 var raf = null;
 function tick() {
@@ -574,35 +598,80 @@ function renderStats() {
 
   var s = currentSession();
   var d = new Date(s.at);
-  $("dDay").textContent = dayName(d);
-  $("dDate").textContent = dateName(d);
+  $("dDateTxt").textContent = dayName(d) + ", " + dateName(d);
 
-  $("aDist").textContent = s.dist ? km(s.dist) : "–";
+  $("aDist").textContent = s.dist ? km(s.dist).toUpperCase() : "0,00 KM";
+  $("aTime").textContent = mmss(s.dur);
 
   var gain = elevGain(s.pts);
   var es = elevSeries(s.pts);
-  $("aGain").textContent = es.length ? gain + " m aufwärts" : "–";
-  drawGraph("gElev", es, false);
+  $("aGain").textContent = es.length ? gain + " m" : "–";
 
   var ps = paceSeries(s.pts);
   var avg = s.dist > 100 ? s.dur / (s.dist / 1000) : 0;
-  $("aPace").textContent  = avg ? pace(avg) : "–";
   $("aPace2").textContent = avg ? pace(avg) : "–";
-  $("aTime").textContent  = mmss(s.dur);
-  drawGraph("gPace", ps, true);
+  $("aBest").textContent = ps.length ? pace(Math.min.apply(null, ps)) : "–";
 
-  renderTrend();
+  var okP = drawGraph("gPace", ps, true);
+  $("gPace").style.display = okP ? "" : "none";
+  $("paceEmpty").hidden = okP;
+  if (!okP) {
+    $("paceEmpty").textContent = (s.pts && s.pts.length)
+      ? "Zu kurze Aufzeichnung" : "Keine Pace verfügbar";
+  }
+
+  renderSplits(s);
 }
 
-function renderTrend() {
-  var withD = sessions.filter(function (s) { return s.dist > 100; })
-                      .slice(0, 12).reverse();
-  var vals = withD.map(function (s) { return s.dist / 1000; });
-  var ok = drawGraph("gTrend", vals, false);
-  if (!ok) { $("aTrend").textContent = "–"; return; }
-  var diff = vals[vals.length - 1] - vals[0];
-  $("aTrend").textContent = (diff >= 0 ? "+" : "−") +
-    Math.abs(diff).toFixed(2).replace(".", ",") + " km";
+/* Rekonstruiert die Runden aus dem gespeicherten Konfigurationsstand und
+   ordnet jedem Lauf-Abschnitt die tatsächliche GPS-Pace in diesem Zeitfenster zu. */
+function renderSplits(s) {
+  var wrap = $("splitsWrap"), list = $("splitList");
+  list.innerHTML = "";
+  if (!s.lap) { wrap.hidden = true; return; }
+  var segs = buildSegs(s.lap);
+  var runSegs = segs.filter(function (x) { return x.type === "run"; });
+  if (!runSegs.length) { wrap.hidden = true; return; }
+  wrap.hidden = false;
+
+  var bounds = [], t = 0;
+  segs.forEach(function (x) { bounds.push(t); t += x.dur; });
+
+  runSegs.forEach(function (seg) {
+    var i = segs.indexOf(seg);
+    var walkAfter = segs[i + 1] && segs[i + 1].type === "walk" ? segs[i + 1] : null;
+    var t0 = bounds[i], t1 = bounds[i] + seg.dur;
+    var splitPace = splitPaceFor(s, t0, t1);
+
+    var row = document.createElement("div");
+    row.className = "split-row";
+    row.innerHTML =
+      '<span class="split-n"></span>' +
+      '<div class="split-bar"><i class="run"></i><i class="walk"></i></div>' +
+      '<span class="split-times"></span>' +
+      '<span class="split-pace"></span>';
+    row.querySelector(".split-n").textContent = seg.idx;
+    var runI = row.querySelector(".run"), walkI = row.querySelector(".walk");
+    runI.style.flex = seg.dur + " 0 0";
+    walkI.style.flex = (walkAfter ? walkAfter.dur : 0.001) + " 0 0";
+    row.querySelector(".split-times").textContent =
+      mmss(seg.dur) + (walkAfter ? " / " + mmss(walkAfter.dur) : "");
+    row.querySelector(".split-pace").textContent = splitPace ? pace(splitPace) : "–";
+    list.appendChild(row);
+  });
+}
+/* Durchschnittspace innerhalb eines Zeitfensters (Sekunden ab Start) aus den
+   aufgezeichneten GPS-Punkten der Einheit. */
+function splitPaceFor(s, t0, t1) {
+  if (!s.pts || s.pts.length < 2 || !s.at) return null;
+  var abs0 = s.at + t0 * 1000, abs1 = s.at + t1 * 1000;
+  var win = s.pts.filter(function (p) { return p[2] >= abs0 && p[2] <= abs1; });
+  if (win.length < 2) return null;
+  var dist = 0;
+  for (var i = 1; i < win.length; i++) dist += haversine(win[i - 1][0], win[i - 1][1], win[i][0], win[i][1]);
+  var dur = (win[win.length - 1][2] - win[0][2]) / 1000;
+  if (dist < 15 || dur < 10) return null;
+  return dur / (dist / 1000);
 }
 
 function renderOverview() {
@@ -656,14 +725,31 @@ function renderMapDate() {
   $("mNext").disabled = !has || pick <= 0;
   if (!has) return;
   var d = new Date(currentSession().at);
-  $("mDay").textContent = dayName(d);
-  $("mDate").textContent = dateName(d);
+  $("mDateTxt").textContent = dayName(d) + ", " + dateName(d);
 }
 function showPicked() {
   if (MAP.live) return;                 /* laufende Aufzeichnung nicht überschreiben */
   MAP.clearLive();
   var s = currentSession();
   MAP.show(s ? s.pts : []);
+  if (s && s.dist > 100) {
+    var avg = s.dur / (s.dist / 1000);
+    $("mDist").textContent = km(s.dist);
+    $("mTime").textContent = mmss(s.dur);
+    $("mPace").textContent = pace(avg);
+    $("mapMetrics").hidden = false;
+  } else {
+    $("mapMetrics").hidden = true;
+  }
+}
+/* Aktualisiert die Kartenmetriken live während einer laufenden Aufzeichnung. */
+function updateLiveMapMetrics() {
+  if (GEO.dist < 100) { $("mapMetrics").hidden = true; return; }
+  var e = elapsed();
+  $("mDist").textContent = km(GEO.dist);
+  $("mTime").textContent = mmss(e);
+  $("mPace").textContent = e > 20 ? pace(e / (GEO.dist / 1000)) : "–";
+  $("mapMetrics").hidden = false;
 }
 
 /* ================= Eingaben ================= */
@@ -693,6 +779,7 @@ function bindSwitch(id, key, after) {
 function goTab(t) {
   document.querySelectorAll(".pane").forEach(function (p) { p.classList.toggle("on", p.id === "p-" + t); });
   document.querySelectorAll(".isl").forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.t === t)); });
+  document.body.classList.toggle("stats-bg", t === "stats");
   window.scrollTo(0, 0);
   if (t === "map") {
     MAP.init();
@@ -724,7 +811,7 @@ function toast(m) {
   t.textContent = m; t.classList.add("on");
   clearTimeout(tt); tt = setTimeout(function () { t.classList.remove("on"); }, 2800);
 }
-function note(m) { $("gpsNote").textContent = m; }
+function note(m) { var n = $("gpsNote"); n.textContent = m; n.hidden = !m; }
 
 /* ================= Verdrahtung ================= */
 $("bMain").addEventListener("click", function () { S.running ? pause() : start(); });
@@ -757,7 +844,7 @@ bindSwitch("swGeo",   "geo",   function () {
   if (cfg.geo) {
     GEO.prime();
     if (!cfg.wake) { cfg.wake = true; $("swWake").setAttribute("aria-pressed", "true"); saveCfg(); }
-  } else { GEO.stop(); note("Ortung nicht aktiv."); }
+  } else { GEO.stop(); note(""); }
 });
 
 /* ================= Start ================= */
@@ -777,7 +864,6 @@ bindSwitch("swGeo",   "geo",   function () {
     var p = pair.split("|");
     $(p[0]).setAttribute("aria-pressed", String(cfg[p[1]]));
   });
-  if (cfg.geo) note("Ortung bereit. Startet mit der Einheit.");
   $("bGeo").hidden = cfg.geo;
 
   prep(); draw(); renderStats(); renderMapDate();
